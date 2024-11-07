@@ -2,6 +2,5 @@
 
 # BlackListedToken Model
 class BlacklistedToken < ApplicationRecord
-  validates :token, presence: true
-  validates :exp, presence: true
+  validates_presence_of :token, :exp
 end

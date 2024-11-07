@@ -13,7 +13,6 @@ class AuthorizeApiRequest < ApplicationService
 
   def user
     @user ||= @decoded_auth_token[:user_type].constantize.find(@decoded_auth_token[:user_id])
-    # @user || errors.add(:token, 'Token has expired') && nil
   end
 
   def decoded_auth_token

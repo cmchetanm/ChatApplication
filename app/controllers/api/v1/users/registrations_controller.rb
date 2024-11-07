@@ -6,6 +6,7 @@ module Api
       # Registrations Controller
       class RegistrationsController < Api::V1::ApiController
         skip_before_action :authenticate_request, only: %i[create check_status]
+        before_action :find_user, only: :check_status
 
         def create
           unless registration_params[:email].present?
@@ -23,23 +24,27 @@ module Api
 
         # POST /password_reset
         def password_reset
-          return unless current_user.update(password: params[:password])
-
-          render_success_response('', I18n.t('login.password_reset'), 200)
+          if current_user.update!(password: params[:password])
+            render_success_response('', I18n.t('login.password_reset'), 200)
+          else
+            render_unprocessable_entity_response(current_user)
+          end
         end
 
         # GET /check_status
         def check_status
-          user = User.find_by(id: params[:id])
-          return render_unprocessable_entity(I18n.t('errors.user_not_found')) unless user.present?
-
-          render_success_response('', I18n.t('user.status', status: user.status), 200)
+          render_success_response('', I18n.t('user.status', status: @user.status), 200)
         end
 
         private
 
         def registration_params
           params.permit(:full_name, :email, :password)
+        end
+
+        def find_user
+          @user = User.find_by(id: params[:id])
+          return render_unprocessable_entity(I18n.t('errors.user_not_found')) unless @user.present?
         end
       end
     end

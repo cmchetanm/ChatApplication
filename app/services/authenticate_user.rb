@@ -1,6 +1,6 @@
 class AuthenticateUser < ApplicationService
 
-  attr_accessor :email, :password
+  attr_accessor :email, :password, :user
 
   def initialize(email, password)
     @email = email
@@ -10,12 +10,12 @@ class AuthenticateUser < ApplicationService
   def call
     return unless authenticate_user.present?
     
-    { token: JsonWebToken.encode(user_id: authenticate_user.id, user_type: 'User') }
+    { token: JsonWebToken.encode(user_id: user.id, user_type: 'User') }
   end
   private
 
   def authenticate_user
-    user = User.find_by(email: email)
+    @user = User.find_by(email: email)
     if user.present?
       if user&.authenticate(password)
         return user
